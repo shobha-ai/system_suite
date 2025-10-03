@@ -15,9 +15,10 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          # --- THIS IS THE CRITICAL FIX ---
-          flutter-version: '3.19.6' 
+          flutter-version: '3.19.6'
           channel: 'stable'
+          cache: true
+          cache-key: 'flutter-pub-${{ hashFiles('**/pubspec.lock') }}'
 
       - name: Install dependencies
         run: flutter pub get
