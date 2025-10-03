@@ -15,10 +15,23 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
+          # --- THIS IS THE CRITICAL FIX ---
+          flutter-version: '3.19.6' 
           channel: 'stable'
 
       - name: Install dependencies
         run: flutter pub get
+
+      - name: Create Android project files
+        run: flutter create . --platforms=android
+
+      - name: Change package name
+        run: flutter pub run change_app_package_name:main com.apptools.systemsuite
+
+      - name: Change app display name
+        run: sed -i 's/android:label="system_suite"/android:label="System Suite"/g' android/app/src/main/AndroidManifest.xml
+
+      # No need to add permissions with sed, modern Flutter create + url_launcher handle it.
 
       - name: Build APK
         run: flutter build apk --release --split-per-abi

@@ -4,13 +4,13 @@ import 'package:installed_apps/installed_apps.dart';
 
 class AppManagerScreen extends StatefulWidget {
   const AppManagerScreen({super.key});
-
   @override
   State<AppManagerScreen> createState() => _AppManagerScreenState();
 }
 
 class _AppManagerScreenState extends State<AppManagerScreen> {
-  List<AppInfo>? _apps;
+  List<AppInfo> _allApps = [];
+  List<AppInfo> _displayedApps = [];
   bool _showSystemApps = false;
 
   @override
@@ -20,21 +20,31 @@ class _AppManagerScreenState extends State<AppManagerScreen> {
   }
 
   void _loadApps() {
-    setState(() { _apps = null; });
-    InstalledApps.getInstalledApps(_showSystemApps, true).then((apps) {
+    setState(() { _displayedApps = []; });
+    InstalledApps.getInstalledApps(true, true).then((apps) {
       setState(() {
         apps.sort((a, b) => (a.name ?? "").compareTo(b.name ?? ""));
-        _apps = apps;
+        _allApps = apps;
+        _filterApps();
       });
+    });
+  }
+
+  void _filterApps() {
+    setState(() {
+      if (_showSystemApps) {
+        _displayedApps = _allApps;
+      } else {
+        // This is the clean filtering logic that now works
+        _displayedApps = _allApps.where((app) => app.isSystemApp == false).toList();
+      }
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("App Manager"),
-      ),
+      appBar: AppBar(title: const Text("App Manager")),
       body: Column(
         children: [
           SwitchListTile(
@@ -43,18 +53,18 @@ class _AppManagerScreenState extends State<AppManagerScreen> {
             onChanged: (bool value) {
               setState(() {
                 _showSystemApps = value;
-                _loadApps();
+                _filterApps();
               });
             },
           ),
           const Divider(height: 1),
           Expanded(
-            child: _apps == null
+            child: _allApps.isEmpty
                 ? const Center(child: CircularProgressIndicator())
                 : ListView.builder(
-                    itemCount: _apps!.length,
+                    itemCount: _displayedApps.length,
                     itemBuilder: (context, index) {
-                      AppInfo app = _apps![index];
+                      AppInfo app = _displayedApps[index];
                       return ListTile(
                         leading: CircleAvatar(
                           backgroundColor: Colors.transparent,
