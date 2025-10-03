@@ -11,34 +11,25 @@ class AppListScreen extends StatefulWidget {
 }
 
 class _AppListScreenState extends State<AppListScreen> {
-  List<AppInfo> _allApps = [];
-  List<AppInfo> _displayedApps = [];
+  List<AppInfo>? _apps;
   bool _showSystemApps = false;
 
   @override
   void initState() {
     super.initState();
+    // Load the initial list (without system apps)
     _loadApps();
   }
 
+  // The logic is now much simpler.
+  // We ask the system for the correct list each time.
   void _loadApps() {
-    setState(() { _displayedApps = []; });
-    InstalledApps.getInstalledApps(true, true).then((apps) {
+    setState(() { _apps = null; });
+    InstalledApps.getInstalledApps(_showSystemApps, true).then((apps) {
       setState(() {
         apps.sort((a, b) => (a.name ?? "").compareTo(b.name ?? ""));
-        _allApps = apps;
-        _filterApps();
+        _apps = apps;
       });
-    });
-  }
-
-  void _filterApps() {
-    setState(() {
-      if (_showSystemApps) {
-        _displayedApps = _allApps;
-      } else {
-        _displayedApps = _allApps.where((app) => !app.isSystemApp!).toList();
-      }
     });
   }
 
@@ -72,19 +63,20 @@ class _AppListScreenState extends State<AppListScreen> {
             title: const Text("Show System Apps"),
             value: _showSystemApps,
             onChanged: (bool value) {
+              // When the switch changes, update the state and reload the correct app list.
               setState(() {
                 _showSystemApps = value;
-                _filterApps();
+                _loadApps();
               });
             },
           ),
           Expanded(
-            child: _allApps.isEmpty
+            child: _apps == null
                 ? const Center(child: CircularProgressIndicator())
                 : ListView.builder(
-                    itemCount: _displayedApps.length,
+                    itemCount: _apps!.length,
                     itemBuilder: (context, index) {
-                      AppInfo app = _displayedApps[index];
+                      AppInfo app = _apps![index];
                       return ListTile(
                         leading: CircleAvatar(
                           backgroundColor: Colors.transparent,
