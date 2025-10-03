@@ -12,7 +12,7 @@ dependencies:
   cupertino_icons: ^1.0.6
   installed_apps: ^1.6.0
   url_launcher: ^6.3.1
-  accessibility_service: ^0.0.3
+  accessibility_service: ^0.0.2
 
 dev_dependencies:
   flutter_test:
