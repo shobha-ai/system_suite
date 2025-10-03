@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:installed_apps/app_info.dart';
+import 'package:installed_apps/installed_apps.dart';
 
 void main() {
   runApp(const MyApp());
@@ -10,29 +12,34 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'System Suite',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.indigo,
+        brightness: Brightness.dark,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const AppListScreen(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-  final String title;
+class AppListScreen extends StatefulWidget {
+  const AppListScreen({super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<AppListScreen> createState() => _AppListScreenState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class _AppListScreenState extends State<AppListScreen> {
+  List<AppInfo>? _installedApps;
 
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
+  @override
+  void initState() {
+    super.initState();
+    // Get the list of apps when the screen loads
+    InstalledApps.getInstalledApps(true, true).then((apps) {
+      setState(() {
+        _installedApps = apps;
+      });
     });
   }
 
@@ -40,27 +47,29 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: const Text("Installed Applications"),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
+      body: _installedApps == null
+          // Show a loading circle while the apps are being scanned
+          ? const Center(child: CircularProgressIndicator())
+          // Once loaded, show the list of apps
+          : ListView.builder(
+              itemCount: _installedApps!.length,
+              itemBuilder: (context, index) {
+                AppInfo app = _installedApps![index];
+                return ListTile(
+                  leading: CircleAvatar(
+                    backgroundColor: Colors.transparent,
+                    // Show the app's icon
+                    child: Image.memory(app.icon!),
+                  ),
+                  // Show the app's name
+                  title: Text(app.name ?? "Unknown App"),
+                  // Show the app's package name
+                  subtitle: Text(app.packageName ?? "Unknown Package"),
+                );
+              },
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ),
     );
   }
 }
