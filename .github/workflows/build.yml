@@ -20,6 +20,10 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      # ---- THIS IS THE NEW, IMPORTANT STEP ----
+      - name: Create project files
+        run: flutter create . --platforms=android
+
       - name: Build APK
         run: flutter build apk --release
 
