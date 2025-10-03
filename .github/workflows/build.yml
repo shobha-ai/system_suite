@@ -27,8 +27,14 @@ jobs:
         run: flutter pub run change_app_package_name:main com.apptools.systemsuite
 
       - name: Add permissions to AndroidManifest
+        # This command finds the </manifest> tag and inserts the <queries> block right before it.
         run: |
-          sed -i '/<\/application>/i \    <queries>\n        <intent>\n            <action android:name="android.intent.action.MAIN" \/>\n        <\/intent>\n    <\/queries>' android/app/src/main/AndroidManifest.xml
+          sed -i -e '/<\/manifest>/i \
+          <queries>\
+              <intent>\
+                  <action android:name="android.intent.action.MAIN" \/>\
+              <\/intent>\
+          <\/queries>' android/app/src/main/AndroidManifest.xml
 
       - name: Change app display name
         run: sed -i 's/android:label="system_suite"/android:label="System Suite"/g' android/app/src/main/AndroidManifest.xml
