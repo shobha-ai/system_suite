@@ -20,9 +20,16 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      # ---- THIS IS THE NEW, IMPORTANT STEP ----
       - name: Create project files
         run: flutter create . --platforms=android
+
+      # --- NEW STEP 1: Change Package Name ---
+      - name: Change package name
+        run: flutter pub run change_app_package_name:main com.apptools.systemsuite
+
+      # --- NEW STEP 2: Change App Display Name ---
+      - name: Change app display name
+        run: sed -i 's/android:label="system_suite"/android:label="System Suite"/g' android/app/src/main/AndroidManifest.xml
 
       - name: Build APK
         run: flutter build apk --release --split-per-abi
